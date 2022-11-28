@@ -5,9 +5,12 @@ import labelRequests from "./api/labelRequests";
 function App() {
   // Label's state
   const [labels, setLabels] = useState<Label[]>([]);
-  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
   const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
   const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
+
+  // Memo's state
+  const [memos, setMemos] = useState<Memo[]>([]);
 
   //Label's CRUD, render
   useEffect(() => {
@@ -52,9 +55,9 @@ function App() {
     setEditLabel(null);
   };
 
-  const selectLabel = (id: string | null) => {
-    setSelectedLabel(id);
-    window.history.pushState("", "Memo", `/labelId=${id}`);
+  const selectLabel = (label: Label | null) => {
+    setSelectedLabel(label);
+    window.history.pushState("", "Memo", `/labelId=${label?.id}`);
   };
 
   const renderLabels = () => {
@@ -88,18 +91,18 @@ function App() {
         <div
           key={label.id}
           onClick={() => {
-            if (selectedLabel === label.id) {
+            if (selectedLabel?.id === label.id) {
               selectLabel(null);
             } else {
-              selectLabel(label.id);
+              selectLabel(label);
             }
           }}
           style={
-            selectedLabel === label.id ? { backgroundColor: "yellow" } : {}
+            selectedLabel?.id === label.id ? { backgroundColor: "yellow" } : {}
           }
         >
           {label.title}
-          {selectedLabel === label.id ? (
+          {selectedLabel?.id === label.id ? (
             <span>
               <button onClick={() => deleteLabel(label.id)}>Delete</button>
               <button onClick={() => selectUpdateTargetLabel(label.id)}>
@@ -119,12 +122,12 @@ function App() {
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
         <div style={{ flex: "20%", border: "1px solid" }}>
-          <h3>Labels({"MemoList.length"})</h3>
+          <h3>전체 메모({"MemoList.length"})</h3>
           {renderLabels()}
           <input type="button" value="Add Label" onClick={addLabel} />
         </div>
         <div style={{ width: "30%", border: "1px solid" }}>
-          <h3>Memo List</h3>
+          <h3>{selectedLabel?.title ? selectedLabel.title : ""}</h3>
         </div>
         <div style={{ width: "50%", border: "1px solid" }}>
           <h3>Memo Detail</h3>
