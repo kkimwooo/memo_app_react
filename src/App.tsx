@@ -14,11 +14,19 @@ function App() {
   const [memoList, setMemoList] = useState<Memo[]>([]);
   const [memosByLabel, setMemosByLabel] = useState<Memo[]>([]);
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
+  const [checkedMemo, setCheckedMemo] = useState<Memo[]>([]);
 
-  //Label's CRUD, render
+  // Memo Detail's state
+  const [memoTitle, setMemoTitle] = useState<string | null>(null);
+  const [memoContent, setMemoContent] = useState<string | null>(null);
+  const [isEditMemo, setIsEditMemo] = useState<boolean>(false);
+
+  //Label's
   useEffect(() => {
+    console.log("useEffect");
     getLabels();
     getMemoList();
+    //TODO : url parameter 가져와서 memo, label 선택하기
   }, []);
 
   const getLabels = async () => {
@@ -119,7 +127,7 @@ function App() {
     });
   };
 
-  //Memo's CRUD, render
+  //Memo's
   useEffect(() => {
     getMemosByLabel();
   }, [selectedLabel]);
@@ -143,6 +151,7 @@ function App() {
       .then(async (res) => {
         const memosFromServer = await res.data.data;
         setMemosByLabel(memosFromServer);
+        selectMemo(memosFromServer[0]);
       });
   };
 
@@ -176,6 +185,122 @@ function App() {
     });
   };
 
+  //Memo Detail's
+  const createMemo = async () => {
+    const memo: Memo = {
+      title: memoTitle,
+      content: memoContent,
+      labels: [selectedLabel],
+    } as Memo;
+    //TODO : Try Catch , 2개 동시에 비동기로 수행되도록 수정
+    const result = await axiosInstance.post(memoRequests.createMemo, memo);
+
+    const resultMemo = result.data.data;
+    const memoId = resultMemo.id;
+    await axiosInstance.post(
+      labelRequests.addMemosToLabel.replace(":id", selectedLabel!.id),
+      { memoIds: [memoId] }
+    );
+
+    getMemoList();
+    getLabels();
+    getMemosByLabel();
+    selectMemo(resultMemo);
+  };
+
+  const deleteMemo = async (id: string) => {
+    //TODO : Try Catch
+    await axiosInstance.delete(memoRequests.deleteMemo.replace(":id", id));
+    getMemoList();
+    getLabels();
+    getMemosByLabel();
+    selectMemo(null);
+  };
+
+  const updateMemo = async (id: string) => {
+    //TODO : Try Catch
+    await axiosInstance.put(memoRequests.updateMemo.replace(":id", id), {
+      title: memoTitle,
+      content: memoContent,
+    });
+    getMemoList();
+    getLabels();
+    getMemosByLabel();
+    selectMemo(selectedMemo);
+  };
+
+  const renderCreateMemo = () => {
+    if (isEditMemo) {
+      return (
+        <div>
+          <input
+            type="text"
+            defaultValue={selectedMemo?.title}
+            onChange={(e) => {
+              setMemoTitle(e.target.value);
+            }}
+          />
+          <textarea
+            defaultValue={selectedMemo?.content}
+            onChange={(e) => {
+              setMemoContent(e.target.value);
+            }}
+          />
+          <button
+            onClick={() => {
+              setIsEditMemo(false);
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              updateMemo(selectedMemo!.id);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <div>
+            <input
+              type="text"
+              placeholder="여기에 제목을 입력하세요"
+              onChange={(e) => {
+                setMemoTitle(e.target.value);
+              }}
+            />{" "}
+            <button onClick={createMemo}>Create</button>
+          </div>
+          <div>
+            <textarea
+              style={{ width: "100%", height: "100vh" }}
+              onChange={(e) => setMemoContent(e.target.value)}
+              placeholder="여기에 내용을 입력하세요"
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const renderMemoDetail = () => {
+    return (
+      <div>
+        <div>
+          {selectedMemo?.title}{" "}
+          <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
+          <button onClick={() => setIsEditMemo(true)}>수정</button>{" "}
+        </div>
+        <div>{selectedMemo!.updatedAt.toString()}</div>
+        <div>{selectedMemo?.content}</div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <nav>
@@ -205,7 +330,15 @@ function App() {
         </div>
 
         <div style={{ width: "50%", border: "1px solid" }}>
-          <h3>Memo Detail</h3>
+          {selectedLabel ? (
+            selectedMemo ? (
+              renderMemoDetail()
+            ) : (
+              renderCreateMemo()
+            )
+          ) : (
+            <h3>라벨을 선택해주세요</h3>
+          )}
         </div>
       </div>
     </div>
@@ -218,7 +351,7 @@ interface Memo {
   id: string;
   title: string;
   content: string;
-  labels: string[];
+  labels: Label[];
   updatedAt: Date;
   createdAt: Date;
 }
