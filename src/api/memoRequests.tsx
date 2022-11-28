@@ -1,11 +1,11 @@
 const memoRequests = {
-  getMemoList: "/memo",
-  createMemo: "/memo",
-  getMemo: "/memo/:id",
-  updateMemo: "/memo/:id",
-  deleteMemo: "/memo/:id",
+  getMemoList: "/memos",
+  createMemo: "/memos",
+  getMemo: "/memos/:id",
+  updateMemo: "/memos/:id",
+  deleteMemo: "/memos/:id",
 
-  getLabelsByMemo: "/memo/:id/labels",
+  getLabelsByMemo: "/memos/:id/labels",
 };
 
 export default memoRequests;
