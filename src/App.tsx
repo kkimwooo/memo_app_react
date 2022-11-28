@@ -3,11 +3,13 @@ import axiosInstance from "./api/axios";
 import labelRequests from "./api/labelRequests";
 
 function App() {
+  // Label's state
   const [labels, setLabels] = useState<Label[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
   const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
 
+  //Label's CRUD, render
   useEffect(() => {
     getLabels();
   }, []);
@@ -20,11 +22,23 @@ function App() {
     });
   };
 
+  const addLabel = () => {
+    const newLabel: Label = {
+      title: "라벨 " + (labels.length + 1),
+    } as Label;
+
+    //TODO : 중복 검사 필요, try catch
+    axiosInstance.post(labelRequests.createLabel, newLabel).then((res) => {
+      getLabels();
+    });
+  };
+
   const deleteLabel = async (id: string) => {
     //TODO : Try Catch
     await axiosInstance.delete(labelRequests.deleteLabel.replace(":id", id));
     getLabels();
   };
+
   const selectUpdateTargetLabel = async (id: string) => {
     setEditLabel(id);
   };
@@ -53,6 +67,7 @@ function App() {
           <div key={label.id}>
             <input
               type="text"
+              maxLength={10}
               defaultValue={label.title}
               onChange={(e) => {
                 setUpdateLabelName(e.target.value);
@@ -94,17 +109,6 @@ function App() {
           ) : null}
         </div>
       );
-    });
-  };
-
-  const addLabel = () => {
-    const newLabel: Label = {
-      title: "라벨 " + (labels.length + 1),
-    } as Label;
-
-    //TODO : 중복 검사 필요, try catch
-    axiosInstance.post(labelRequests.createLabel, newLabel).then((res) => {
-      getLabels();
     });
   };
 
