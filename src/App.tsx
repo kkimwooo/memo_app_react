@@ -3,18 +3,44 @@ import axiosInstance from "./api/axios";
 import labelRequests from "./api/labelRequests";
 
 function App() {
-  const [labels, setLabels] = useState<string[]>([]);
+  const [labels, setLabels] = useState<Label[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
+  const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
 
   useEffect(() => {
     getLabels();
   }, []);
 
   const getLabels = async () => {
+    //TODO : Try Catch
     await axiosInstance.get(labelRequests.getLabelList).then(async (res) => {
-      const labelsFromServer = await res.data;
-      setLabels(labelsFromServer.data);
+      const labelsFromServer = await res.data.data;
+      setLabels(labelsFromServer);
     });
+  };
+
+  const deleteLabel = async (id: string) => {
+    //TODO : Try Catch
+    await axiosInstance.delete(labelRequests.deleteLabel.replace(":id", id));
+    getLabels();
+  };
+  const selectUpdateTargetLabel = async (id: string) => {
+    setEditLabel(id);
+  };
+
+  const updateLabel = async (id: string) => {
+    //TODO : Try Catch
+    await axiosInstance.put(labelRequests.updateLabel.replace(":id", id), {
+      title: updateLabelName,
+    });
+    getLabels();
+    setEditLabel(null);
+  };
+
+  const selectLabel = (id: string | null) => {
+    setSelectedLabel(id);
+    window.history.pushState("", "Memo", `/labelId=${id}`);
   };
 
   const renderLabels = () => {
@@ -22,23 +48,64 @@ function App() {
       return <div>There are no labels</div>;
     }
     return labels.map((label) => {
+      if (updateTargetLabel === label.id) {
+        return (
+          <div key={label.id}>
+            <input
+              type="text"
+              defaultValue={label.title}
+              onChange={(e) => {
+                setUpdateLabelName(e.target.value);
+              }}
+            />
+            <button onClick={() => setEditLabel(null)}>Cancel</button>
+            <button
+              onClick={() => {
+                updateLabel(label.id);
+              }}
+            >
+              Save
+            </button>
+          </div>
+        );
+      }
       return (
         <div
-          key={label}
+          key={label.id}
           onClick={() => {
-            setSelectedLabel(label);
+            if (selectedLabel === label.id) {
+              selectLabel(null);
+            } else {
+              selectLabel(label.id);
+            }
           }}
+          style={
+            selectedLabel === label.id ? { backgroundColor: "yellow" } : {}
+          }
         >
-          {label}
+          {label.title}
+          {selectedLabel === label.id ? (
+            <span>
+              <button onClick={() => deleteLabel(label.id)}>Delete</button>
+              <button onClick={() => selectUpdateTargetLabel(label.id)}>
+                Rename
+              </button>
+            </span>
+          ) : null}
         </div>
       );
     });
   };
 
   const addLabel = () => {
-    const newLabel = "라벨" + (labels.length + 1);
-    //TODO : 중복 검사 필요
-    setLabels([...labels, newLabel]);
+    const newLabel: Label = {
+      title: "라벨 " + (labels.length + 1),
+    } as Label;
+
+    //TODO : 중복 검사 필요, try catch
+    axiosInstance.post(labelRequests.createLabel, newLabel).then((res) => {
+      getLabels();
+    });
   };
 
   return (
@@ -69,6 +136,14 @@ interface Memo {
   title: string;
   content: string;
   labels: string[];
+  updatedAt: Date;
+  createdAt: Date;
+}
+
+interface Label {
+  title: string;
+  id: string;
+  memoCount: number;
   updatedAt: Date;
   createdAt: Date;
 }
