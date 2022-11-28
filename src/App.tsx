@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "./api/axios";
 import labelRequests from "./api/labelRequests";
+import memoRequests from "./api/memoRequests";
 
 function App() {
   // Label's state
@@ -10,11 +11,14 @@ function App() {
   const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
 
   // Memo's state
-  const [memos, setMemos] = useState<Memo[]>([]);
+  const [memoList, setMemoList] = useState<Memo[]>([]);
+  const [memosByLabel, setMemosByLabel] = useState<Memo[]>([]);
+  const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
 
   //Label's CRUD, render
   useEffect(() => {
     getLabels();
+    getMemoList();
   }, []);
 
   const getLabels = async () => {
@@ -101,7 +105,7 @@ function App() {
             selectedLabel?.id === label.id ? { backgroundColor: "yellow" } : {}
           }
         >
-          {label.title}
+          {`${label.title}(${label.memoCount})`}
           {selectedLabel?.id === label.id ? (
             <span>
               <button onClick={() => deleteLabel(label.id)}>Delete</button>
@@ -115,6 +119,63 @@ function App() {
     });
   };
 
+  //Memo's CRUD, render
+  useEffect(() => {
+    getMemosByLabel();
+  }, [selectedLabel]);
+
+  const getMemoList = async () => {
+    //TODO : Try Catch
+    await axiosInstance.get(memoRequests.getMemoList).then(async (res) => {
+      const memosFromServer = await res.data.data;
+      setMemoList(memosFromServer);
+    });
+  };
+
+  const getMemosByLabel = async () => {
+    if (selectedLabel === null) {
+      setMemosByLabel([]);
+      return;
+    }
+    //TODO : Try Catch
+    await axiosInstance
+      .get(labelRequests.getMemosByLabel.replace(":id", selectedLabel.id))
+      .then(async (res) => {
+        const memosFromServer = await res.data.data;
+        setMemosByLabel(memosFromServer);
+      });
+  };
+
+  const selectMemo = (memo: Memo | null) => {
+    setSelectedMemo(memo);
+    window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
+  };
+
+  const renderMemos = () => {
+    if (memosByLabel.length === 0) {
+      return <div>There are no memos</div>;
+    }
+    return memosByLabel.map((memo) => {
+      return (
+        <div
+          key={memo.id}
+          onClick={() => {
+            if (selectedMemo?.id === memo.id) {
+              selectMemo(null);
+            } else {
+              selectMemo(memo);
+            }
+          }}
+          style={
+            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
+          }
+        >
+          {memo.title}
+        </div>
+      );
+    });
+  };
+
   return (
     <div>
       <nav>
@@ -122,13 +183,27 @@ function App() {
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
         <div style={{ flex: "20%", border: "1px solid" }}>
-          <h3>전체 메모({"MemoList.length"})</h3>
+          <h3>전체 메모({memoList.length})</h3>
           {renderLabels()}
           <input type="button" value="Add Label" onClick={addLabel} />
         </div>
+
         <div style={{ width: "30%", border: "1px solid" }}>
-          <h3>{selectedLabel?.title ? selectedLabel.title : ""}</h3>
+          {selectedLabel?.title ? (
+            <div>
+              <div>
+                {selectedLabel.title}
+                <button>이름 변경</button>
+                <button>설정</button>
+                <button>삭제</button>
+              </div>
+              {renderMemos()}
+            </div>
+          ) : (
+            <h3>라벨을 선택해주세요</h3>
+          )}
         </div>
+
         <div style={{ width: "50%", border: "1px solid" }}>
           <h3>Memo Detail</h3>
         </div>
@@ -140,6 +215,7 @@ function App() {
 export default App;
 
 interface Memo {
+  id: string;
   title: string;
   content: string;
   labels: string[];
