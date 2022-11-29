@@ -100,6 +100,7 @@ function App() {
           memoList={memoList}
           selectedMemo={selectedMemo}
           checkedMemoIds={checkedMemoIds}
+          labels={labels}
           setUpdateLabelName={setUpdateLabelName}
           setEditLabel={setEditLabel}
           setSelectedMemo={setSelectedMemo}

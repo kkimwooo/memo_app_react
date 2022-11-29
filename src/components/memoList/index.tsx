@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Memo from "../../types/MemoTypes";
 import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
@@ -12,6 +13,7 @@ export default function MemoList({
   memoList,
   selectedMemo,
   checkedMemoIds,
+  labels,
   setUpdateLabelName,
   setEditLabel,
   selectMemo,
@@ -115,6 +117,23 @@ export default function MemoList({
     });
   };
 
+  const onClickAddLabelsToMemo = () => {
+    setShowLabelList(!showLabelList);
+  };
+
+  const [showLabelList, setShowLabelList] = useState(false);
+
+  const deleteLabelsFromMemo = async () => {
+    //TODO : Try Catch
+    await axiosInstance.post(
+      labelRequests.deleteMemoFromLabel.replace(":id", selectedLabel!.id!),
+      { memoIds: checkedMemoIds }
+    );
+    getMemoList();
+    getLabels();
+    getMemosByLabel();
+  };
+
   //TODO : 컴포넌트 분리 필요
   return (
     <div style={{ width: "30%", border: "1px solid" }}>
@@ -155,9 +174,14 @@ export default function MemoList({
                 </button>
                 {checkedMemoIds.length > 0 ? (
                   <>
-                    <button>라벨 지정</button>
-                    <button>라벨 제거</button>
-                    <button onClick={() => deleteMemos()}>삭제</button>
+                    <div>
+                      <button>라벨 지정</button>
+                      <button onClick={() => deleteLabelsFromMemo()}>
+                        라벨 제거
+                      </button>
+                      <button onClick={() => deleteMemos()}>삭제</button>
+                    </div>
+                    <div>{showLabelList ? <div></div> : null}</div>
                   </>
                 ) : null}
               </div>
@@ -179,7 +203,6 @@ export default function MemoList({
               {checkedMemoIds.length > 0 ? (
                 <>
                   <button>라벨 지정</button>
-                  <button>라벨 제거</button>
                   <button onClick={() => deleteMemos()}>삭제</button>
                 </>
               ) : null}

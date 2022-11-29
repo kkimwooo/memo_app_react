@@ -7,7 +7,7 @@ const labelRequests = {
 
   getMemosByLabel: "/labels/:id/memos",
   addMemosToLabel: "/labels/:id/memos",
-  deleteMemoFromLabel: "/labels/:id/memos/delte",
+  deleteMemoFromLabel: "/labels/:id/memos/delete",
 };
 
 export default labelRequests;

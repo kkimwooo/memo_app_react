@@ -9,6 +9,7 @@ export default interface MemoListPropsType {
   memoList: Memo[];
   selectedMemo: Memo | null;
   checkedMemoIds: string[];
+  labels: Label[];
   setUpdateLabelName: React.Dispatch<React.SetStateAction<string | null>>;
   setEditLabel: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedMemo: React.Dispatch<React.SetStateAction<Memo | null>>;

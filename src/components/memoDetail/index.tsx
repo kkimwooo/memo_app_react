@@ -121,7 +121,7 @@ export default function MemoDetail({
               </button>
             </div>
             <textarea
-              defaultValue={selectedMemo?.content}
+              defaultValue={selectedMemo?.content ?? ""}
               style={{ width: "100%", height: "100vh" }}
               onChange={(e) => {
                 setMemoContent(e.target.value);
@@ -154,7 +154,7 @@ export default function MemoDetail({
                 disabled={false}
                 style={{ width: "100%", height: "100vh" }}
               >
-                {selectedMemo?.content}
+                {selectedMemo?.content ?? ""}
               </textarea>
             </div>
           </>
