@@ -118,12 +118,71 @@ export default function MemoList({
     });
   };
 
+  const renderTitleMemoList = (title: string | null) => {
+    return (
+      <div
+        style={{
+          border: "1px solid",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        {title ? title : "전체 메모"}
+        <div>
+          {title ? (
+            <button onClick={() => selectUpdateTargetLabel(selectedLabel!.id)}>
+              라벨명 변경
+            </button>
+          ) : null}
+          {checkedMemoIds.length > 0 ? (
+            <>
+              <div>
+                <button onClick={() => onClickShowLabelsToMemo()}>
+                  라벨 지정
+                </button>
+
+                {title ? (
+                  <button onClick={() => deleteLabelsFromMemo()}>
+                    라벨 제거
+                  </button>
+                ) : null}
+                <button onClick={() => deleteMemos()}>삭제</button>
+              </div>
+              <div>
+                {" "}
+                {showLabelList
+                  ? labels.map((label: Label) => {
+                      return (
+                        <div key={label.id}>
+                          <input
+                            id={label.id}
+                            type="checkbox"
+                            onChange={(e) =>
+                              onCheckLabel(e.target.id, e.target.checked)
+                            }
+                          />
+                          <label htmlFor={label.id}>{label.title}</label>
+                        </div>
+                      );
+                    })
+                  : null}
+                {showLabelList ? (
+                  <button onClick={() => addMemosToLabel()}>저장</button>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
   const onClickShowLabelsToMemo = () => {
     setShowLabelList(!showLabelList);
   };
 
+  //memoList 에서만 사용하는 state
   const [showLabelList, setShowLabelList] = useState(false);
-
   const [checkedLabelIds, setCheckedLabelIds] = useState<string[]>([]);
 
   const onCheckLabel = (id: string, checked: boolean) => {
@@ -166,7 +225,7 @@ export default function MemoList({
       {selectedLabel?.title ? (
         <div style={{ width: "100%" }}>
           {updateTargetLabel === selectedLabel.id ? (
-            <div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
               <input
                 type="text"
                 defaultValue={selectedLabel.title}
@@ -174,87 +233,25 @@ export default function MemoList({
                   setUpdateLabelName(e.target.value);
                 }}
               />
-              <button onClick={() => setEditLabel(null)}>Cancel</button>
-              <button
-                onClick={() => {
-                  updateLabel(selectedLabel.id);
-                }}
-              >
-                Save
-              </button>
-            </div>
-          ) : (
-            <div
-              style={{
-                border: "1px solid",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              {selectedLabel.title}
               <div>
+                <button onClick={() => setEditLabel(null)}>Cancel</button>
                 <button
-                  onClick={() => selectUpdateTargetLabel(selectedLabel.id)}
+                  onClick={() => {
+                    updateLabel(selectedLabel.id);
+                  }}
                 >
-                  라벨명 변경
+                  Save
                 </button>
-                {checkedMemoIds.length > 0 ? (
-                  <>
-                    <div>
-                      <button>라벨 지정</button>
-                      <button onClick={() => deleteLabelsFromMemo()}>
-                        라벨 제거
-                      </button>
-                      <button onClick={() => deleteMemos()}>삭제</button>
-                    </div>
-                    <div>{showLabelList ? <div></div> : null}</div>
-                  </>
-                ) : null}
               </div>
             </div>
+          ) : (
+            renderTitleMemoList(selectedLabel?.title)
           )}
           {renderMemosByLabel()}
         </div>
       ) : (
         <div>
-          <div
-            style={{
-              border: "1px solid",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            전체 메모
-            <div>
-              {checkedMemoIds.length > 0 ? (
-                <>
-                  <button onClick={() => onClickShowLabelsToMemo()}>
-                    라벨 지정
-                  </button>
-                  <button onClick={() => deleteMemos()}>삭제</button>
-                </>
-              ) : null}
-            </div>
-          </div>
-          <div>
-            {showLabelList
-              ? labels.map((label: Label) => {
-                  return (
-                    <div key={label.id}>
-                      <input
-                        id={label.id}
-                        type="checkbox"
-                        onChange={(e) =>
-                          onCheckLabel(e.target.id, e.target.checked)
-                        }
-                      />
-                      <label htmlFor={label.id}>{label.title}</label>
-                    </div>
-                  );
-                })
-              : null}
-            <button onClick={() => addMemosToLabel()}>저장</button>
-          </div>
+          {renderTitleMemoList(null)}
           {renderTotalMemos()}
         </div>
       )}
