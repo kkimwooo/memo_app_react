@@ -5,6 +5,7 @@ import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import MemoListPropsType from "../../types/tmpMemoListPropsType";
 import memoRequests from "../../api/memoRequests";
+import Label from "../../types/LabelTypes";
 export default function MemoList({
   selectedLabel,
   updateTargetLabel,
@@ -117,11 +118,21 @@ export default function MemoList({
     });
   };
 
-  const onClickAddLabelsToMemo = () => {
+  const onClickShowLabelsToMemo = () => {
     setShowLabelList(!showLabelList);
   };
 
   const [showLabelList, setShowLabelList] = useState(false);
+
+  const [checkedLabelIds, setCheckedLabelIds] = useState<string[]>([]);
+
+  const onCheckLabel = (id: string, checked: boolean) => {
+    if (checked) {
+      setCheckedLabelIds([...checkedLabelIds, id]);
+    } else {
+      setCheckedLabelIds(checkedLabelIds.filter((labelId) => labelId !== id));
+    }
+  };
 
   const deleteLabelsFromMemo = async () => {
     //TODO : Try Catch
@@ -132,6 +143,21 @@ export default function MemoList({
     getMemoList();
     getLabels();
     getMemosByLabel();
+  };
+
+  const addMemosToLabel = async () => {
+    //TODO : Try Catch, 비동기로 처리 필요
+    checkedLabelIds.forEach(async (labelId) => {
+      await axiosInstance.post(
+        labelRequests.addMemosToLabel.replace(":id", labelId),
+        { memoIds: checkedMemoIds }
+      );
+    });
+    //getMemoList();
+    getLabels();
+    getMemosByLabel();
+    setCheckedLabelIds([]);
+    setShowLabelList(false);
   };
 
   //TODO : 컴포넌트 분리 필요
@@ -202,11 +228,32 @@ export default function MemoList({
             <div>
               {checkedMemoIds.length > 0 ? (
                 <>
-                  <button>라벨 지정</button>
+                  <button onClick={() => onClickShowLabelsToMemo()}>
+                    라벨 지정
+                  </button>
                   <button onClick={() => deleteMemos()}>삭제</button>
                 </>
               ) : null}
             </div>
+          </div>
+          <div>
+            {showLabelList
+              ? labels.map((label: Label) => {
+                  return (
+                    <div key={label.id}>
+                      <input
+                        id={label.id}
+                        type="checkbox"
+                        onChange={(e) =>
+                          onCheckLabel(e.target.id, e.target.checked)
+                        }
+                      />
+                      <label htmlFor={label.id}>{label.title}</label>
+                    </div>
+                  );
+                })
+              : null}
+            <button onClick={() => addMemosToLabel()}>저장</button>
           </div>
           {renderTotalMemos()}
         </div>
