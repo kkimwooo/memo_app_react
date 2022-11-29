@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import axiosInstance from "./api/axios";
 import labelRequests from "./api/labelRequests";
 import memoRequests from "./api/memoRequests";
-import LabelList from "./component/LabelList";
+import LabelList from "./components/labelList";
 import Memo from "./types/MemoTypes";
 import Label from "./types/LabelTypes";
-import MemoList from "./component/MemoList";
-import MemoDetail from "./component/MemoDetail";
+import MemoList from "./components/memoList";
+import MemoDetail from "./components/memoDetail";
 
 function App() {
   // Label's state

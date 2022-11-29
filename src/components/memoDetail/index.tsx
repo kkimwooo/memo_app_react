@@ -1,9 +1,9 @@
-import axiosInstance from "../api/axios";
-import labelRequests from "../api/labelRequests";
-import memoRequests from "../api/memoRequests";
-import Memo from "../types/MemoTypes";
-import MemoDetailPropsType from "../types/tmpMemoDetailPropsType";
-import formattingDate from "../utils/utils";
+import axiosInstance from "../../api/axios";
+import labelRequests from "../../api/labelRequests";
+import memoRequests from "../../api/memoRequests";
+import Memo from "../../types/MemoTypes";
+import MemoDetailPropsType from "../../types/tmpMemoDetailPropsType";
+import formattingDate from "../../utils/utils";
 
 export default function MemoDetail({
   selectedMemo,

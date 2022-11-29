@@ -1,7 +1,7 @@
-import axiosInstance from "../api/axios";
-import labelRequests from "../api/labelRequests";
-import Label from "../types/LabelTypes";
-import LabelPropsType from "../types/tmpLabelPropsType";
+import axiosInstance from "../../api/axios";
+import labelRequests from "../../api/labelRequests";
+import Label from "../../types/LabelTypes";
+import LabelPropsType from "../../types/tmpLabelPropsType";
 
 export default function LabelList({
   labels,

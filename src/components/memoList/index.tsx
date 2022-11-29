@@ -1,8 +1,9 @@
-import Memo from "../types/MemoTypes";
-import formattingDate from "../utils/utils";
-import axiosInstance from "../api/axios";
-import labelRequests from "../api/labelRequests";
-import MemoListPropsType from "../types/tmpMemoListPropsType";
+import { useState } from "react";
+import Memo from "../../types/MemoTypes";
+import formattingDate from "../../utils/utils";
+import axiosInstance from "../../api/axios";
+import labelRequests from "../../api/labelRequests";
+import MemoListPropsType from "../../types/tmpMemoListPropsType";
 export default function MemoList({
   selectedLabel,
   updateTargetLabel,
@@ -15,6 +16,8 @@ export default function MemoList({
   selectMemo,
   getLabels,
 }: MemoListPropsType) {
+  const [selectedMemoIds, setSelectedMemoIds] = useState<string[]>([]);
+
   const updateLabel = async (id: string) => {
     //TODO : Try Catch
     await axiosInstance.put(labelRequests.updateLabel.replace(":id", id), {
