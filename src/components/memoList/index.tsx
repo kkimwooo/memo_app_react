@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { labelsState } from "../../recoil/label";
+import { labelsState, selectedLabelsState } from "../../recoil/label";
+import {
+  memoListState,
+  selectedMemoState,
+  checkedMemoIdsState,
+  memosByLabelState,
+} from "../../recoil/memo";
 import Memo from "../../types/MemoTypes";
 import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
@@ -9,23 +15,23 @@ import MemoListPropsType from "../../types/tmpMemoListPropsType";
 import memoRequests from "../../api/memoRequests";
 import Label from "../../types/LabelTypes";
 export default function MemoList({
-  selectedLabel,
-  updateTargetLabel,
-  updateLabelName,
-  memosByLabel,
-  memoList,
-  selectedMemo,
-  checkedMemoIds,
-  setUpdateLabelName,
-  setEditLabel,
   selectMemo,
   getLabels,
-  setCheckedMemoIds,
   getMemoList,
   getMemosByLabel,
 }: MemoListPropsType) {
+  const [updateTargetLabel, setUpdateTargetLabel] = useState<string | null>(
+    null
+  );
+  const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
+
   const labelsRecoil = useRecoilValue(labelsState);
-  const setLabelRecoil = useSetRecoilState(labelsState);
+  const selectedLabelsRecoil = useRecoilValue(selectedLabelsState);
+  const memoListRecoil = useRecoilValue(memoListState);
+  const selectedMemoRecoil = useRecoilValue(selectedMemoState);
+  const checkedMemoIdsRecoil = useRecoilValue(checkedMemoIdsState);
+  const setCheckedMemoIdsRecoil = useSetRecoilState(checkedMemoIdsState);
+  const memosByLabelRecoil = useRecoilValue(memosByLabelState);
 
   const updateLabel = async (id: string) => {
     //TODO : Try Catch
@@ -33,26 +39,26 @@ export default function MemoList({
       title: updateLabelName,
     });
     getLabels();
-    setEditLabel(null);
+    setUpdateTargetLabel(null);
   };
 
   const selectUpdateTargetLabel = async (id: string) => {
-    setEditLabel(id);
+    setUpdateTargetLabel(id);
   };
 
   const onCheckMemo = (checkedId: string, checked: boolean) => {
     if (checked) {
-      setCheckedMemoIds([...checkedMemoIds, checkedId]);
+      setCheckedMemoIdsRecoil([...checkedMemoIdsRecoil, checkedId]);
     } else {
-      setCheckedMemoIds(
-        checkedMemoIds.filter((memoId) => memoId !== checkedId)
+      setCheckedMemoIdsRecoil(
+        checkedMemoIdsRecoil.filter((memoId) => memoId !== checkedId)
       );
     }
   };
 
   const deleteMemos = async () => {
     //TODO : Try Catch
-    checkedMemoIds.forEach(async (memoId) => {
+    checkedMemoIdsRecoil.forEach(async (memoId) => {
       await axiosInstance.delete(
         memoRequests.deleteMemo.replace(":id", memoId)
       );
@@ -61,7 +67,7 @@ export default function MemoList({
     getLabels();
     getMemosByLabel();
     selectMemo(null);
-    setCheckedMemoIds([]);
+    setCheckedMemoIdsRecoil([]);
   };
 
   const memoItem = (memo: Memo) => {
@@ -86,7 +92,7 @@ export default function MemoList({
             selectMemo(memo);
           }}
           style={{
-            backgroundColor: selectedMemo?.id === memo.id ? "gray" : "",
+            backgroundColor: selectedMemoRecoil?.id === memo.id ? "gray" : "",
           }}
         >
           <div>{memo.title}</div>
@@ -98,7 +104,7 @@ export default function MemoList({
   };
 
   const renderMemosByLabel = () => {
-    if (memosByLabel.length === 0) {
+    if (memosByLabelRecoil.length === 0) {
       return (
         <div style={{ display: "flex", height: "100vh", alignItems: "center" }}>
           <h2>
@@ -108,16 +114,16 @@ export default function MemoList({
         </div>
       );
     }
-    return memosByLabel.map((memo: Memo) => {
+    return memosByLabelRecoil.map((memo: Memo) => {
       return memoItem(memo);
     });
   };
 
   const renderTotalMemos = () => {
-    if (memoList.length === 0) {
+    if (memoListRecoil.length === 0) {
       return <div>There are no memos</div>;
     }
-    return memoList.map((memo: Memo) => {
+    return memoListRecoil.map((memo: Memo) => {
       return memoItem(memo);
     });
   };
@@ -134,11 +140,13 @@ export default function MemoList({
         {title ? title : "전체 메모"}
         <div>
           {title ? (
-            <button onClick={() => selectUpdateTargetLabel(selectedLabel!.id)}>
+            <button
+              onClick={() => selectUpdateTargetLabel(selectedLabelsRecoil!.id)}
+            >
               라벨명 변경
             </button>
           ) : null}
-          {checkedMemoIds.length > 0 ? (
+          {checkedMemoIdsRecoil.length > 0 ? (
             <>
               <div>
                 <button onClick={() => onClickShowLabelsToMemo()}>
@@ -200,8 +208,11 @@ export default function MemoList({
   const deleteLabelsFromMemo = async () => {
     //TODO : Try Catch
     await axiosInstance.post(
-      labelRequests.deleteMemoFromLabel.replace(":id", selectedLabel!.id!),
-      { memoIds: checkedMemoIds }
+      labelRequests.deleteMemoFromLabel.replace(
+        ":id",
+        selectedLabelsRecoil!.id!
+      ),
+      { memoIds: checkedMemoIdsRecoil }
     );
     getMemoList();
     getLabels();
@@ -213,7 +224,7 @@ export default function MemoList({
     checkedLabelIds.forEach(async (labelId) => {
       await axiosInstance.post(
         labelRequests.addMemosToLabel.replace(":id", labelId),
-        { memoIds: checkedMemoIds }
+        { memoIds: checkedMemoIdsRecoil }
       );
     });
     //getMemoList();
@@ -226,22 +237,24 @@ export default function MemoList({
   //TODO : 컴포넌트 분리 필요
   return (
     <div style={{ width: "30%", border: "1px solid" }}>
-      {selectedLabel?.title ? (
+      {selectedLabelsRecoil?.title ? (
         <div style={{ width: "100%" }}>
-          {updateTargetLabel === selectedLabel.id ? (
+          {updateTargetLabel === selectedLabelsRecoil.id ? (
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <input
                 type="text"
-                defaultValue={selectedLabel.title}
+                defaultValue={selectedLabelsRecoil.title}
                 onChange={(e) => {
                   setUpdateLabelName(e.target.value);
                 }}
               />
               <div>
-                <button onClick={() => setEditLabel(null)}>Cancel</button>
+                <button onClick={() => setUpdateTargetLabel(null)}>
+                  Cancel
+                </button>
                 <button
                   onClick={() => {
-                    updateLabel(selectedLabel.id);
+                    updateLabel(selectedLabelsRecoil.id);
                   }}
                 >
                   Save
@@ -249,7 +262,7 @@ export default function MemoList({
               </div>
             </div>
           ) : (
-            renderTitleMemoList(selectedLabel?.title)
+            renderTitleMemoList(selectedLabelsRecoil?.title)
           )}
           {renderMemosByLabel()}
         </div>

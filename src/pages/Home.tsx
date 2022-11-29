@@ -5,31 +5,25 @@ import labelRequests from "../api/labelRequests";
 import memoRequests from "../api/memoRequests";
 import LabelList from "../components/labelList";
 import Memo from "../types/MemoTypes";
-import Label from "../types/LabelTypes";
 import MemoList from "../components/memoList";
 import MemoDetail from "../components/memoDetail";
-import { labelsState } from "../recoil/label";
+import { labelsState, selectedLabelsState } from "../recoil/label";
+import {
+  memoListState,
+  selectedMemoState,
+  isEditMemoState,
+  checkedMemoIdsState,
+  memosByLabelState,
+} from "../recoil/memo";
 
 export default function Home() {
-  // Label's state
-  const labelsRecoil = useRecoilValue(labelsState);
   const setLabelRecoil = useSetRecoilState(labelsState);
-
-  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
-  const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(true);
-  const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
-  const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
-
-  // Memo's state
-  const [memoList, setMemoList] = useState<Memo[]>([]);
-  const [memosByLabel, setMemosByLabel] = useState<Memo[]>([]);
-  const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
-  const [checkedMemoIds, setCheckedMemoIds] = useState<string[]>([]);
-
-  // Memo Detail's state
-  const [memoTitle, setMemoTitle] = useState<string>("");
-  const [memoContent, setMemoContent] = useState<string | null>(null);
-  const [isEditMemo, setIsEditMemo] = useState<boolean>(false);
+  const selectedLabelsRecoil = useRecoilValue(selectedLabelsState);
+  const setMemoListRecoil = useSetRecoilState(memoListState);
+  const setSelectedMemoStateRecoil = useSetRecoilState(selectedMemoState);
+  const setCheckedMemoIdsRecoil = useSetRecoilState(checkedMemoIdsState);
+  const setIsEditMemoRecoil = useSetRecoilState(isEditMemoState);
+  const setMemosByLabelRecoil = useSetRecoilState(memosByLabelState);
 
   //Label's
   useEffect(() => {
@@ -47,37 +41,39 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setIsEditMemo(false);
-    setCheckedMemoIds([]);
+    setIsEditMemoRecoil(false);
+    setCheckedMemoIdsRecoil([]);
     getMemosByLabel();
-  }, [selectedLabel]);
+  }, [selectedLabelsRecoil]);
 
   const getMemoList = async () => {
     //TODO : Try Catch
     await axiosInstance.get(memoRequests.getMemoList).then(async (res) => {
       const memosFromServer = await res.data.data;
-      setMemoList(memosFromServer);
+      setMemoListRecoil(memosFromServer);
     });
   };
 
   const getMemosByLabel = async () => {
-    if (selectedLabel === null) {
-      setMemosByLabel([]);
+    if (selectedLabelsRecoil === null) {
+      setMemosByLabelRecoil([]);
       return;
     }
     //TODO : Try Catch
     await axiosInstance
-      .get(labelRequests.getMemosByLabel.replace(":id", selectedLabel.id))
+      .get(
+        labelRequests.getMemosByLabel.replace(":id", selectedLabelsRecoil.id)
+      )
       .then(async (res) => {
         const memosFromServer = await res.data.data;
-        setMemosByLabel(memosFromServer);
+        setMemosByLabelRecoil(memosFromServer);
         selectMemo(memosFromServer[0]);
       });
   };
 
   const selectMemo = (memo: Memo | null) => {
-    setIsEditMemo(false);
-    setSelectedMemo(memo);
+    setIsEditMemoRecoil(false);
+    setSelectedMemoStateRecoil(memo);
     //window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };
 
@@ -87,40 +83,15 @@ export default function Home() {
         <h1>Note Web</h1>
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
-        <LabelList
-          selectedLabel={selectedLabel}
-          setSelectedLabel={setSelectedLabel}
-          setIsSelectTotalMemo={setIsSelectTotalMemo}
-          isSelectTotalMemo={isSelectTotalMemo}
-          memoList={memoList}
-        />
+        <LabelList />
         <MemoList
-          selectedLabel={selectedLabel}
-          updateTargetLabel={updateTargetLabel}
-          updateLabelName={updateLabelName}
-          memosByLabel={memosByLabel}
-          memoList={memoList}
-          selectedMemo={selectedMemo}
-          checkedMemoIds={checkedMemoIds}
-          setUpdateLabelName={setUpdateLabelName}
-          setEditLabel={setEditLabel}
-          setSelectedMemo={setSelectedMemo}
           selectMemo={selectMemo}
           getLabels={getLabels}
-          setCheckedMemoIds={setCheckedMemoIds}
           getMemoList={getMemoList}
           getMemosByLabel={getMemosByLabel}
         />
 
         <MemoDetail
-          selectedMemo={selectedMemo}
-          isEditMemo={isEditMemo}
-          setIsEditMemo={setIsEditMemo}
-          memoTitle={memoTitle}
-          setMemoTitle={setMemoTitle}
-          memoContent={memoContent}
-          setMemoContent={setMemoContent}
-          selectedLabel={selectedLabel}
           selectMemo={selectMemo}
           getMemoList={getMemoList}
           getLabels={getLabels}

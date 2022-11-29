@@ -1,32 +1,34 @@
 import { useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { labelsState, selectedLabelsState } from "../../recoil/label";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import memoRequests from "../../api/memoRequests";
 import Memo from "../../types/MemoTypes";
 import MemoDetailPropsType from "../../types/tmpMemoDetailPropsType";
 import formattingDate from "../../utils/utils";
+import { selectedMemoState, isEditMemoState } from "../../recoil/memo";
 
 export default function MemoDetail({
-  selectedMemo,
-  isEditMemo,
-  setIsEditMemo,
-  memoTitle,
-  setMemoTitle,
-  memoContent,
-  setMemoContent,
-  selectedLabel,
   selectMemo,
   getMemoList,
   getLabels,
   getMemosByLabel,
 }: MemoDetailPropsType) {
   const [isCreateNewMemo, setIsCreateNewMemo] = useState(false);
+  const [memoTitle, setMemoTitle] = useState<string>("");
+  const [memoContent, setMemoContent] = useState<string | null>(null);
+
+  const selectedLabelsRecoil = useRecoilValue(selectedLabelsState);
+  const selectedMemoRecoil = useRecoilValue(selectedMemoState);
+  const isEditMemoRecoil = useRecoilValue(isEditMemoState);
+  const setIsEditMemoRecoil = useSetRecoilState(isEditMemoState);
 
   const createMemo = async () => {
     const memo: Memo = {
       title: memoTitle,
       content: memoContent,
-      labels: [selectedLabel],
+      labels: [selectedLabelsRecoil],
     } as Memo;
     //TODO : Try Catch , 2개 동시에 비동기로 수행되도록 수정
     const result = await axiosInstance.post(memoRequests.createMemo, memo);
@@ -35,9 +37,9 @@ export default function MemoDetail({
     const memoId = resultMemo.id;
 
     //선택된 라벨이 전체 메모인 경우엔 라벨을 추가하지 않는다.
-    if (selectedLabel !== null) {
+    if (selectedLabelsRecoil !== null) {
       await axiosInstance.post(
-        labelRequests.addMemosToLabel.replace(":id", selectedLabel!.id),
+        labelRequests.addMemosToLabel.replace(":id", selectedLabelsRecoil!.id),
         { memoIds: [memoId] }
       );
     }
@@ -56,7 +58,7 @@ export default function MemoDetail({
       {
         title: memoTitle,
         content: memoContent,
-        labels: [selectedLabel],
+        labels: [selectedLabelsRecoil],
       }
     );
     const responseMemo = response.data.data;
@@ -95,33 +97,33 @@ export default function MemoDetail({
   const renderMemoDetail = () => {
     return (
       <div>
-        {isEditMemo ? (
+        {isEditMemoRecoil ? (
           <>
             <div>
               <input
                 type="text"
-                defaultValue={selectedMemo?.title}
+                defaultValue={selectedMemoRecoil?.title}
                 onChange={(e) => {
                   setMemoTitle(e.target.value);
                 }}
               />
               <button
                 onClick={() => {
-                  setIsEditMemo(false);
+                  setIsEditMemoRecoil(false);
                 }}
               >
                 취소
               </button>
               <button
                 onClick={() => {
-                  updateMemo(selectedMemo!.id);
+                  updateMemo(selectedMemoRecoil!.id);
                 }}
               >
                 수정
               </button>
             </div>
             <textarea
-              defaultValue={selectedMemo?.content}
+              defaultValue={selectedMemoRecoil?.content}
               style={{ width: "100%", height: "100vh" }}
               onChange={(e) => {
                 setMemoContent(e.target.value);
@@ -137,23 +139,23 @@ export default function MemoDetail({
                 justifyContent: "space-between",
               }}
             >
-              {selectedMemo?.title}
+              {selectedMemoRecoil?.title}
 
               <button onClick={() => setIsCreateNewMemo(true)}>
                 신규 메모 작성
               </button>
             </div>
             <div
-              onClick={() => setIsEditMemo(true)}
+              onClick={() => setIsEditMemoRecoil(true)}
               style={{ height: "100vh" }}
             >
               <div style={{ float: "right" }}>
-                {formattingDate(selectedMemo!.updatedAt.toString())}
+                {formattingDate(selectedMemoRecoil!.updatedAt.toString())}
               </div>
               <textarea
                 readOnly={true}
                 style={{ width: "100%", height: "100vh" }}
-                value={selectedMemo?.content ?? ""}
+                value={selectedMemoRecoil?.content ?? ""}
               ></textarea>
             </div>
           </>
@@ -165,7 +167,7 @@ export default function MemoDetail({
     <div style={{ width: "50%", border: "1px solid" }}>
       {isCreateNewMemo
         ? renderCreateMemo()
-        : selectedMemo
+        : selectedMemoRecoil
         ? renderMemoDetail()
         : renderCreateMemo()}
     </div>

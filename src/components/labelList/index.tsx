@@ -1,19 +1,21 @@
+import { useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { labelsState } from "../../recoil/label";
+import { labelsState, selectedLabelsState } from "../../recoil/label";
+import { memoListState } from "../../recoil/memo";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import Label from "../../types/LabelTypes";
-import LabelPropsType from "../../types/tmpLabelPropsType";
 
-export default function LabelList({
-  selectedLabel,
-  setSelectedLabel,
-  setIsSelectTotalMemo,
-  isSelectTotalMemo,
-  memoList,
-}: LabelPropsType) {
+export default function LabelList() {
   const labelsRecoil = useRecoilValue(labelsState);
   const setLabelRecoil = useSetRecoilState(labelsState);
+
+  const selectedLabelsRecoil = useRecoilValue(selectedLabelsState);
+  const setSelectedLabelsRecoil = useSetRecoilState(selectedLabelsState);
+
+  const memoListRecoil = useRecoilValue(memoListState);
+
+  const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(true);
 
   const getLabels = async () => {
     //TODO : Try Catch
@@ -25,13 +27,13 @@ export default function LabelList({
 
   const selectLabel = (label: Label | null) => {
     setIsSelectTotalMemo(false);
-    setSelectedLabel(label);
+    setSelectedLabelsRecoil(label);
     //window.history.pushState("", "Memo", `/labelId=${label?.id}`);
   };
 
   //TODO : 기존 selectLabel과 합치기?
   const selectTotalMemo = () => {
-    setSelectedLabel(null);
+    setSelectedLabelsRecoil(null);
     setIsSelectTotalMemo(!isSelectTotalMemo);
     //window.history.pushState("", "Memo", `/`);
   };
@@ -62,14 +64,15 @@ export default function LabelList({
         <div
           key={label.id}
           onClick={() => {
-            if (selectedLabel?.id === label.id) {
+            if (selectedLabelsRecoil?.id === label.id) {
               selectLabel(null);
             } else {
               selectLabel(label);
             }
           }}
           style={{
-            backgroundColor: selectedLabel?.id === label.id ? "gray" : "",
+            backgroundColor:
+              selectedLabelsRecoil?.id === label.id ? "gray" : "",
             border: "1px solid",
             display: "flex",
             justifyContent: "space-between",
@@ -78,7 +81,7 @@ export default function LabelList({
           }}
         >
           {`${label.title}(${label.memoCount})`}
-          {selectedLabel?.id === label.id ? (
+          {selectedLabelsRecoil?.id === label.id ? (
             <span>
               <button onClick={() => deleteLabel(label.id)}>Delete</button>
             </span>
@@ -105,7 +108,7 @@ export default function LabelList({
           height: "50px",
         }}
       >
-        전체 메모({memoList.length})
+        전체 메모({memoListRecoil.length})
         <input type="button" value="Add Label" onClick={addLabel} />
       </div>
       {renderLabels()}

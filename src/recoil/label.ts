@@ -5,3 +5,8 @@ export const labelsState = atom<Label[]>({
   key: `labelsState`,
   default: [],
 });
+
+export const selectedLabelsState = atom<Label | null>({
+  key: `selectedLabelsState`,
+  default: null,
+});
