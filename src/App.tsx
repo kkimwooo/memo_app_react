@@ -74,7 +74,7 @@ function App() {
   const selectMemo = (memo: Memo | null) => {
     setIsEditMemo(false);
     setSelectedMemo(memo);
-    window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
+    //window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };
 
   return (

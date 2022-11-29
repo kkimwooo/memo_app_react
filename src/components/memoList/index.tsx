@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import Memo from "../../types/MemoTypes";
 import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
@@ -60,9 +59,18 @@ export default function MemoList({
 
   const memoItem = (memo: Memo) => {
     return (
-      <div key={memo.id} style={{ display: "flex", border: "1px solid" }}>
+      <div
+        key={memo.id}
+        style={{
+          display: "flex",
+          border: "1px solid",
+          alignItems: "center",
+          height: "60px",
+        }}
+      >
         <input
           type="checkbox"
+          style={{ width: "10%" }}
           id={memo.id}
           onChange={(e) => onCheckMemo(e.target.id, e.target.checked)}
         ></input>
@@ -70,9 +78,9 @@ export default function MemoList({
           onClick={() => {
             selectMemo(memo);
           }}
-          style={
-            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
-          }
+          style={{
+            backgroundColor: selectedMemo?.id === memo.id ? "gray" : "",
+          }}
         >
           <div>{memo.title}</div>
           <div>{formattingDate(memo.updatedAt.toString())}</div>
@@ -84,7 +92,14 @@ export default function MemoList({
 
   const renderMemosByLabel = () => {
     if (memosByLabel.length === 0) {
-      return <div>There are no memos</div>;
+      return (
+        <div style={{ display: "flex", height: "100vh", alignItems: "center" }}>
+          <h2>
+            해당 라벨에 메모가 없습니다. 라벨을 선택 후 우측 메모장에서 메모를
+            작성해주세요
+          </h2>
+        </div>
+      );
     }
     return memosByLabel.map((memo: Memo) => {
       return memoItem(memo);
@@ -104,7 +119,7 @@ export default function MemoList({
   return (
     <div style={{ width: "30%", border: "1px solid" }}>
       {selectedLabel?.title ? (
-        <div>
+        <div style={{ width: "100%" }}>
           {updateTargetLabel === selectedLabel.id ? (
             <div>
               <input
@@ -124,31 +139,51 @@ export default function MemoList({
               </button>
             </div>
           ) : (
-            <div>
+            <div
+              style={{
+                border: "1px solid",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
               {selectedLabel.title}
-              <button onClick={() => selectUpdateTargetLabel(selectedLabel.id)}>
-                라벨명 변경
-              </button>
-              <button>라벨 설정</button>
-              {checkedMemoIds.length > 0 ? (
-                <>
-                  <button onClick={() => deleteMemos()}>삭제</button>
-                </>
-              ) : null}
+              <div>
+                <button
+                  onClick={() => selectUpdateTargetLabel(selectedLabel.id)}
+                >
+                  라벨명 변경
+                </button>
+                {checkedMemoIds.length > 0 ? (
+                  <>
+                    <button>라벨 지정</button>
+                    <button>라벨 제거</button>
+                    <button onClick={() => deleteMemos()}>삭제</button>
+                  </>
+                ) : null}
+              </div>
             </div>
           )}
           {renderMemosByLabel()}
         </div>
       ) : (
         <div>
-          <div>
+          <div
+            style={{
+              border: "1px solid",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
             전체 메모
-            <button>라벨 설정</button>
-            {checkedMemoIds.length > 0 ? (
-              <>
-                <button onClick={() => deleteMemos()}>삭제</button>
-              </>
-            ) : null}
+            <div>
+              {checkedMemoIds.length > 0 ? (
+                <>
+                  <button>라벨 지정</button>
+                  <button>라벨 제거</button>
+                  <button onClick={() => deleteMemos()}>삭제</button>
+                </>
+              ) : null}
+            </div>
           </div>
           {renderTotalMemos()}
         </div>

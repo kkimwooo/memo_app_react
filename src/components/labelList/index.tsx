@@ -23,14 +23,14 @@ export default function LabelList({
   const selectLabel = (label: Label | null) => {
     setIsSelectTotalMemo(false);
     setSelectedLabel(label);
-    window.history.pushState("", "Memo", `/labelId=${label?.id}`);
+    //window.history.pushState("", "Memo", `/labelId=${label?.id}`);
   };
 
   //TODO : 기존 selectLabel과 합치기?
   const selectTotalMemo = () => {
     setSelectedLabel(null);
     setIsSelectTotalMemo(!isSelectTotalMemo);
-    window.history.pushState("", "Memo", `/`);
+    //window.history.pushState("", "Memo", `/`);
   };
 
   const addLabel = () => {
@@ -65,11 +65,14 @@ export default function LabelList({
               selectLabel(label);
             }
           }}
-          style={
-            selectedLabel?.id === label.id
-              ? { backgroundColor: "yellow", border: "1px solid" }
-              : { border: "1px solid" }
-          }
+          style={{
+            backgroundColor: selectedLabel?.id === label.id ? "gray" : "",
+            border: "1px solid",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            height: "50px",
+          }}
         >
           {`${label.title}(${label.memoCount})`}
           {selectedLabel?.id === label.id ? (
@@ -83,16 +86,26 @@ export default function LabelList({
   };
 
   return (
-    <div style={{ flex: "20%", border: "1px solid" }}>
+    <div
+      style={{
+        flex: "20%",
+        border: "1px solid",
+      }}
+    >
       <div
         onClick={() => selectTotalMemo()}
-        style={isSelectTotalMemo ? { backgroundColor: "yellow" } : {}}
+        style={{
+          backgroundColor: isSelectTotalMemo ? "gray" : "",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          height: "50px",
+        }}
       >
         전체 메모({memoList.length})
+        <input type="button" value="Add Label" onClick={addLabel} />
       </div>
       {renderLabels()}
-
-      <input type="button" value="Add Label" onClick={addLabel} />
     </div>
   );
 }

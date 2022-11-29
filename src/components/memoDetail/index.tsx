@@ -1,3 +1,4 @@
+import { useState } from "react";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import memoRequests from "../../api/memoRequests";
@@ -19,6 +20,8 @@ export default function MemoDetail({
   getLabels,
   getMemosByLabel,
 }: MemoDetailPropsType) {
+  const [isCreateNewMemo, setIsCreateNewMemo] = useState(false);
+
   const createMemo = async () => {
     const memo: Memo = {
       title: memoTitle,
@@ -43,20 +46,28 @@ export default function MemoDetail({
     getLabels();
     getMemosByLabel();
     selectMemo(resultMemo);
+    setIsCreateNewMemo(false);
   };
 
   const updateMemo = async (id: string) => {
     //TODO : Try Catch
-    await axiosInstance.put(memoRequests.updateMemo.replace(":id", id), {
-      title: memoTitle,
-      content: memoContent,
-    });
+    const response = await axiosInstance.put(
+      memoRequests.updateMemo.replace(":id", id),
+      {
+        title: memoTitle,
+        content: memoContent,
+        labels: [selectedLabel],
+      }
+    );
+    const responseMemo = response.data.data;
     getMemoList();
     getLabels();
     getMemosByLabel();
-    selectMemo(selectedMemo);
+    selectMemo(responseMemo);
+    setIsCreateNewMemo(false);
   };
 
+  //TODO : 바뀔때마다 state 변경할 필요 없음
   const renderCreateMemo = () => {
     return (
       <div>
@@ -68,7 +79,7 @@ export default function MemoDetail({
               setMemoTitle(e.target.value);
             }}
           />{" "}
-          <button onClick={createMemo}>Create</button>
+          <button onClick={createMemo}>저장</button>
         </div>
         <div>
           <textarea
@@ -99,14 +110,14 @@ export default function MemoDetail({
                   setIsEditMemo(false);
                 }}
               >
-                Cancel
+                취소
               </button>
               <button
                 onClick={() => {
                   updateMemo(selectedMemo!.id);
                 }}
               >
-                Save
+                수정
               </button>
             </div>
             <textarea
@@ -119,13 +130,32 @@ export default function MemoDetail({
           </>
         ) : (
           <>
-            <div style={{ border: "1px solid" }}>{selectedMemo?.title} </div>
+            <div
+              style={{
+                border: "1px solid",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              {selectedMemo?.title}
+
+              <button onClick={() => setIsCreateNewMemo(true)}>
+                신규 메모 작성
+              </button>
+            </div>
             <div
               onClick={() => setIsEditMemo(true)}
               style={{ height: "100vh" }}
             >
-              <div>{formattingDate(selectedMemo!.updatedAt.toString())}</div>
-              <div>{selectedMemo?.content}</div>
+              <div style={{ float: "right" }}>
+                {formattingDate(selectedMemo!.updatedAt.toString())}
+              </div>
+              <textarea
+                disabled={false}
+                style={{ width: "100%", height: "100vh" }}
+              >
+                {selectedMemo?.content}
+              </textarea>
             </div>
           </>
         )}
@@ -134,7 +164,11 @@ export default function MemoDetail({
   };
   return (
     <div style={{ width: "50%", border: "1px solid" }}>
-      {selectedMemo ? renderMemoDetail() : renderCreateMemo()}
+      {isCreateNewMemo
+        ? renderCreateMemo()
+        : selectedMemo
+        ? renderMemoDetail()
+        : renderCreateMemo()}
     </div>
   );
 }
