@@ -15,4 +15,6 @@ export default interface MemoListPropsType {
   selectMemo: (memo: Memo | null) => void;
   getLabels: () => void;
   setCheckedMemoIds: React.Dispatch<React.SetStateAction<string[]>>;
+  getMemoList: () => void;
+  getMemosByLabel: () => void;
 }

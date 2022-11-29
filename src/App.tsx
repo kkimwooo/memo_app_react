@@ -106,6 +106,8 @@ function App() {
           selectMemo={selectMemo}
           getLabels={getLabels}
           setCheckedMemoIds={setCheckedMemoIds}
+          getMemoList={getMemoList}
+          getMemosByLabel={getMemosByLabel}
         />
 
         <MemoDetail

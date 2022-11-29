@@ -50,7 +50,10 @@ export default function MemoDetail({
     await axiosInstance.delete(memoRequests.deleteMemo.replace(":id", id));
     getMemoList();
     getLabels();
+
+    //TODO : 라벨이 전체 메모인 경우에는 메모를 삭제하면 getMemo를 다시 수행하도록 해야함
     getMemosByLabel();
+
     selectMemo(null);
   };
 

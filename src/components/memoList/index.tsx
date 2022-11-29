@@ -4,6 +4,7 @@ import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import MemoListPropsType from "../../types/tmpMemoListPropsType";
+import memoRequests from "../../api/memoRequests";
 export default function MemoList({
   selectedLabel,
   updateTargetLabel,
@@ -17,6 +18,8 @@ export default function MemoList({
   selectMemo,
   getLabels,
   setCheckedMemoIds,
+  getMemoList,
+  getMemosByLabel,
 }: MemoListPropsType) {
   const updateLabel = async (id: string) => {
     //TODO : Try Catch
@@ -39,6 +42,20 @@ export default function MemoList({
         checkedMemoIds.filter((memoId) => memoId !== checkedId)
       );
     }
+  };
+
+  const deleteMemos = async () => {
+    //TODO : Try Catch
+    checkedMemoIds.forEach(async (memoId) => {
+      await axiosInstance.delete(
+        memoRequests.deleteMemo.replace(":id", memoId)
+      );
+    });
+    getMemoList();
+    getLabels();
+    getMemosByLabel();
+    selectMemo(null);
+    setCheckedMemoIds([]);
   };
 
   const memoItem = (memo: Memo) => {
@@ -82,6 +99,7 @@ export default function MemoList({
       return memoItem(memo);
     });
   };
+
   //TODO : 컴포넌트 분리 필요
   return (
     <div style={{ width: "30%", border: "1px solid" }}>
@@ -108,32 +126,29 @@ export default function MemoList({
           ) : (
             <div>
               {selectedLabel.title}
-
+              <button onClick={() => selectUpdateTargetLabel(selectedLabel.id)}>
+                라벨명 변경
+              </button>
+              <button>라벨 설정</button>
               {checkedMemoIds.length > 0 ? (
                 <>
-                  {" "}
-                  <button
-                    onClick={() => selectUpdateTargetLabel(selectedLabel.id)}
-                  >
-                    라벨명 변경
-                  </button>
-                  <button>설정</button>
-                  <button>삭제</button>{" "}
+                  <button onClick={() => deleteMemos()}>삭제</button>
                 </>
-              ) : (
-                <></>
-              )}
+              ) : null}
             </div>
           )}
-
           {renderMemosByLabel()}
         </div>
       ) : (
         <div>
           <div>
             전체 메모
-            <button>설정</button>
-            <button>삭제</button>
+            <button>라벨 설정</button>
+            {checkedMemoIds.length > 0 ? (
+              <>
+                <button onClick={() => deleteMemos()}>삭제</button>
+              </>
+            ) : null}
           </div>
           {renderTotalMemos()}
         </div>
