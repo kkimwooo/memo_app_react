@@ -8,7 +8,7 @@ import {
   memosByLabelState,
 } from "../../recoil/memo";
 import Memo from "../../types/MemoTypes";
-import formattingDate from "../../utils/utils";
+import { formattingDate } from "../../utils/utils";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import MemoListPropsType from "../../types/tmpMemoListPropsType";

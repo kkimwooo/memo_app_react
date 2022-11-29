@@ -6,7 +6,7 @@ import labelRequests from "../../api/labelRequests";
 import memoRequests from "../../api/memoRequests";
 import Memo from "../../types/MemoTypes";
 import MemoDetailPropsType from "../../types/tmpMemoDetailPropsType";
-import formattingDate from "../../utils/utils";
+import { formattingDate } from "../../utils/utils";
 import { selectedMemoState, isEditMemoState } from "../../recoil/memo";
 
 export default function MemoDetail({
