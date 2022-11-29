@@ -22,6 +22,14 @@ function App() {
   const [memoContent, setMemoContent] = useState<string | null>(null);
   const [isEditMemo, setIsEditMemo] = useState<boolean>(false);
 
+  //util
+  const formattingDate = (date: string) => {
+    const newDate = new Date(date);
+    return `${newDate.getFullYear()}.${
+      newDate.getMonth() + 1
+    }.${newDate.getDate()} ${newDate.getHours()}:${newDate.getMinutes()}`;
+  };
+
   //Label's
   useEffect(() => {
     console.log("useEffect");
@@ -169,28 +177,35 @@ function App() {
     window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };
 
+  const memoItem = (memo: Memo) => {
+    return (
+      <div
+        key={memo.id}
+        onClick={() => {
+          selectMemo(memo);
+        }}
+        style={
+          selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
+        }
+      >
+        <div>{memo.title}</div>
+        <div>{formattingDate(memo.updatedAt.toString())}</div>
+        <div>
+          {" "}
+          {memo.content.length < 20
+            ? memo.content
+            : memo.content.slice(0, 20) + "..."}
+        </div>
+      </div>
+    );
+  };
+
   const renderMemosByLabel = () => {
     if (memosByLabel.length === 0) {
       return <div>There are no memos</div>;
     }
     return memosByLabel.map((memo) => {
-      return (
-        <div
-          key={memo.id}
-          onClick={() => {
-            if (selectedMemo?.id === memo.id) {
-              selectMemo(null);
-            } else {
-              selectMemo(memo);
-            }
-          }}
-          style={
-            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
-          }
-        >
-          {memo.title}
-        </div>
-      );
+      return memoItem(memo);
     });
   };
 
@@ -199,23 +214,7 @@ function App() {
       return <div>There are no memos</div>;
     }
     return memoList.map((memo) => {
-      return (
-        <div
-          key={memo.id}
-          onClick={() => {
-            if (selectedMemo?.id === memo.id) {
-              selectMemo(null);
-            } else {
-              selectMemo(memo);
-            }
-          }}
-          style={
-            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
-          }
-        >
-          {memo.title}
-        </div>
-      );
+      return memoItem(memo);
     });
   };
 
@@ -333,7 +332,7 @@ function App() {
           <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
           <button onClick={() => setIsEditMemo(true)}>수정</button>{" "}
         </div>
-        <div>{selectedMemo!.updatedAt.toString()}</div>
+        <div>{formattingDate(selectedMemo!.updatedAt.toString())}</div>
         <div>{selectedMemo?.content}</div>
       </div>
     );
@@ -353,6 +352,7 @@ function App() {
             전체 메모({memoList.length})
           </div>
           {renderLabels()}
+
           <input type="button" value="Add Label" onClick={addLabel} />
         </div>
 
