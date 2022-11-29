@@ -43,6 +43,7 @@ function App() {
   };
 
   useEffect(() => {
+    setIsEditMemo(false);
     getMemosByLabel();
   }, [selectedLabel]);
 
@@ -70,6 +71,7 @@ function App() {
   };
 
   const selectMemo = (memo: Memo | null) => {
+    setIsEditMemo(false);
     setSelectedMemo(memo);
     window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };

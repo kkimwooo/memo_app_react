@@ -67,73 +67,80 @@ export default function MemoDetail({
   };
 
   const renderCreateMemo = () => {
-    if (isEditMemo) {
-      return (
+    return (
+      <div>
         <div>
           <input
             type="text"
-            defaultValue={selectedMemo?.title}
+            placeholder="여기에 제목을 입력하세요"
             onChange={(e) => {
               setMemoTitle(e.target.value);
             }}
-          />
-          <textarea
-            defaultValue={selectedMemo?.content}
-            onChange={(e) => {
-              setMemoContent(e.target.value);
-            }}
-          />
-          <button
-            onClick={() => {
-              setIsEditMemo(false);
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              updateMemo(selectedMemo!.id);
-            }}
-          >
-            Save
-          </button>
+          />{" "}
+          <button onClick={createMemo}>Create</button>
         </div>
-      );
-    } else {
-      return (
         <div>
-          <div>
-            <input
-              type="text"
-              placeholder="여기에 제목을 입력하세요"
-              onChange={(e) => {
-                setMemoTitle(e.target.value);
-              }}
-            />{" "}
-            <button onClick={createMemo}>Create</button>
-          </div>
-          <div>
-            <textarea
-              style={{ width: "100%", height: "100vh" }}
-              onChange={(e) => setMemoContent(e.target.value)}
-              placeholder="여기에 내용을 입력하세요"
-            />
-          </div>
+          <textarea
+            style={{ width: "100%", height: "100vh" }}
+            onChange={(e) => setMemoContent(e.target.value)}
+            placeholder="여기에 내용을 입력하세요"
+          />
         </div>
-      );
-    }
+      </div>
+    );
   };
 
   const renderMemoDetail = () => {
     return (
       <div>
-        <div style={{ border: "1px solid" }}>
-          {selectedMemo?.title}{" "}
-          <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
-          <button onClick={() => setIsEditMemo(true)}>수정</button>{" "}
-        </div>
-        <div>{formattingDate(selectedMemo!.updatedAt.toString())}</div>
-        <div>{selectedMemo?.content}</div>
+        {isEditMemo ? (
+          <>
+            <div>
+              <input
+                type="text"
+                defaultValue={selectedMemo?.title}
+                onChange={(e) => {
+                  setMemoTitle(e.target.value);
+                }}
+              />
+              <button
+                onClick={() => {
+                  setIsEditMemo(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  updateMemo(selectedMemo!.id);
+                }}
+              >
+                Save
+              </button>
+            </div>
+            <textarea
+              defaultValue={selectedMemo?.content}
+              style={{ width: "100%", height: "100vh" }}
+              onChange={(e) => {
+                setMemoContent(e.target.value);
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <div style={{ border: "1px solid" }}>
+              {selectedMemo?.title}{" "}
+              <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
+            </div>
+            <div
+              onClick={() => setIsEditMemo(true)}
+              style={{ height: "100vh" }}
+            >
+              <div>{formattingDate(selectedMemo!.updatedAt.toString())}</div>
+              <div>{selectedMemo?.content}</div>
+            </div>
+          </>
+        )}
       </div>
     );
   };
