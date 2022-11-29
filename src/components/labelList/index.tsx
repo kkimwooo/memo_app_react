@@ -1,22 +1,25 @@
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { labelsState } from "../../recoil/label";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import Label from "../../types/LabelTypes";
 import LabelPropsType from "../../types/tmpLabelPropsType";
 
 export default function LabelList({
-  labels,
-  setLabels,
   selectedLabel,
   setSelectedLabel,
   setIsSelectTotalMemo,
   isSelectTotalMemo,
   memoList,
 }: LabelPropsType) {
+  const labelsRecoil = useRecoilValue(labelsState);
+  const setLabelRecoil = useSetRecoilState(labelsState);
+
   const getLabels = async () => {
     //TODO : Try Catch
     await axiosInstance.get(labelRequests.getLabelList).then(async (res) => {
       const labelsFromServer = await res.data.data;
-      setLabels(labelsFromServer);
+      setLabelRecoil(labelsFromServer);
     });
   };
 
@@ -35,7 +38,7 @@ export default function LabelList({
 
   const addLabel = () => {
     const newLabel: Label = {
-      title: "라벨 " + (labels.length + 1),
+      title: "라벨 " + (labelsRecoil.length + 1),
     } as Label;
 
     //TODO : 중복 검사 필요, try catch
@@ -51,10 +54,10 @@ export default function LabelList({
   };
 
   const renderLabels = () => {
-    if (labels.length === 0) {
+    if (labelsRecoil.length === 0) {
       return <div>There are no labels</div>;
     }
-    return labels.map((label: Label) => {
+    return labelsRecoil.map((label: Label) => {
       return (
         <div
           key={label.id}

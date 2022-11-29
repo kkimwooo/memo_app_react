@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import axiosInstance from "../api/axios";
 import labelRequests from "../api/labelRequests";
 import memoRequests from "../api/memoRequests";
@@ -7,10 +8,13 @@ import Memo from "../types/MemoTypes";
 import Label from "../types/LabelTypes";
 import MemoList from "../components/memoList";
 import MemoDetail from "../components/memoDetail";
+import { labelsState } from "../recoil/label";
 
 export default function Home() {
   // Label's state
-  const [labels, setLabels] = useState<Label[]>([]);
+  const labelsRecoil = useRecoilValue(labelsState);
+  const setLabelRecoil = useSetRecoilState(labelsState);
+
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
   const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(true);
   const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export default function Home() {
     //TODO : Try Catch
     await axiosInstance.get(labelRequests.getLabelList).then(async (res) => {
       const labelsFromServer = await res.data.data;
-      setLabels(labelsFromServer);
+      setLabelRecoil(labelsFromServer);
     });
   };
 
@@ -84,8 +88,6 @@ export default function Home() {
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
         <LabelList
-          labels={labels}
-          setLabels={setLabels}
           selectedLabel={selectedLabel}
           setSelectedLabel={setSelectedLabel}
           setIsSelectTotalMemo={setIsSelectTotalMemo}
@@ -100,7 +102,6 @@ export default function Home() {
           memoList={memoList}
           selectedMemo={selectedMemo}
           checkedMemoIds={checkedMemoIds}
-          labels={labels}
           setUpdateLabelName={setUpdateLabelName}
           setEditLabel={setEditLabel}
           setSelectedMemo={setSelectedMemo}

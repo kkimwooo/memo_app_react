@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { labelsState } from "../../recoil/label";
 import Memo from "../../types/MemoTypes";
 import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
@@ -14,7 +16,6 @@ export default function MemoList({
   memoList,
   selectedMemo,
   checkedMemoIds,
-  labels,
   setUpdateLabelName,
   setEditLabel,
   selectMemo,
@@ -23,6 +24,9 @@ export default function MemoList({
   getMemoList,
   getMemosByLabel,
 }: MemoListPropsType) {
+  const labelsRecoil = useRecoilValue(labelsState);
+  const setLabelRecoil = useSetRecoilState(labelsState);
+
   const updateLabel = async (id: string) => {
     //TODO : Try Catch
     await axiosInstance.put(labelRequests.updateLabel.replace(":id", id), {
@@ -151,7 +155,7 @@ export default function MemoList({
               <div>
                 {" "}
                 {showLabelList
-                  ? labels.map((label: Label) => {
+                  ? labelsRecoil.map((label: Label) => {
                       return (
                         <div key={label.id}>
                           <input
