@@ -45,18 +45,6 @@ export default function MemoDetail({
     selectMemo(resultMemo);
   };
 
-  const deleteMemo = async (id: string) => {
-    //TODO : Try Catch
-    await axiosInstance.delete(memoRequests.deleteMemo.replace(":id", id));
-    getMemoList();
-    getLabels();
-
-    //TODO : 라벨이 전체 메모인 경우에는 메모를 삭제하면 getMemo를 다시 수행하도록 해야함
-    getMemosByLabel();
-
-    selectMemo(null);
-  };
-
   const updateMemo = async (id: string) => {
     //TODO : Try Catch
     await axiosInstance.put(memoRequests.updateMemo.replace(":id", id), {
@@ -131,10 +119,7 @@ export default function MemoDetail({
           </>
         ) : (
           <>
-            <div style={{ border: "1px solid" }}>
-              {selectedMemo?.title}{" "}
-              <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
-            </div>
+            <div style={{ border: "1px solid" }}>{selectedMemo?.title} </div>
             <div
               onClick={() => setIsEditMemo(true)}
               style={{ height: "100vh" }}
