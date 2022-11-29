@@ -127,7 +127,7 @@ export default function MemoDetail({
   const renderMemoDetail = () => {
     return (
       <div>
-        <div>
+        <div style={{ border: "1px solid" }}>
           {selectedMemo?.title}{" "}
           <button onClick={() => deleteMemo(selectedMemo!.id)}>삭제</button>{" "}
           <button onClick={() => setIsEditMemo(true)}>수정</button>{" "}

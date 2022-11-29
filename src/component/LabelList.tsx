@@ -66,7 +66,9 @@ export default function LabelList({
             }
           }}
           style={
-            selectedLabel?.id === label.id ? { backgroundColor: "yellow" } : {}
+            selectedLabel?.id === label.id
+              ? { backgroundColor: "yellow", border: "1px solid" }
+              : { border: "1px solid" }
           }
         >
           {`${label.title}(${label.memoCount})`}
