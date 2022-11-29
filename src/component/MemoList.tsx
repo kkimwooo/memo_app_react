@@ -12,7 +12,7 @@ export default function MemoList({
   selectedMemo,
   setUpdateLabelName,
   setEditLabel,
-  setSelectedMemo,
+  selectMemo,
   getLabels,
 }: MemoListPropsType) {
   const updateLabel = async (id: string) => {
@@ -26,11 +26,6 @@ export default function MemoList({
 
   const selectUpdateTargetLabel = async (id: string) => {
     setEditLabel(id);
-  };
-
-  const selectMemo = (memo: Memo | null) => {
-    setSelectedMemo(memo);
-    window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };
 
   const memoItem = (memo: Memo) => {

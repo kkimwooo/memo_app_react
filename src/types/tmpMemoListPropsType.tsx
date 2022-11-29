@@ -11,5 +11,6 @@ export default interface MemoListPropsType {
   setUpdateLabelName: React.Dispatch<React.SetStateAction<string | null>>;
   setEditLabel: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedMemo: React.Dispatch<React.SetStateAction<Memo | null>>;
+  selectMemo: (memo: Memo | null) => void;
   getLabels: () => void;
 }

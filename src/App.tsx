@@ -27,17 +27,8 @@ function App() {
   const [memoContent, setMemoContent] = useState<string | null>(null);
   const [isEditMemo, setIsEditMemo] = useState<boolean>(false);
 
-  //util
-  const formattingDate = (date: string) => {
-    const newDate = new Date(date);
-    return `${newDate.getFullYear()}.${
-      newDate.getMonth() + 1
-    }.${newDate.getDate()} ${newDate.getHours()}:${newDate.getMinutes()}`;
-  };
-
   //Label's
   useEffect(() => {
-    console.log("useEffect");
     getLabels();
     getMemoList();
     //TODO : url parameter 가져와서 memo, label 선택하기
@@ -49,13 +40,6 @@ function App() {
       const labelsFromServer = await res.data.data;
       setLabels(labelsFromServer);
     });
-  };
-
-  //TODO : 기존 selectLabel과 합치기?
-  const selectTotalMemo = () => {
-    setSelectedLabel(null);
-    setIsSelectTotalMemo(!isSelectTotalMemo);
-    window.history.pushState("", "Memo", `/`);
   };
 
   useEffect(() => {
@@ -100,7 +84,6 @@ function App() {
           labels={labels}
           setLabels={setLabels}
           selectedLabel={selectedLabel}
-          selectTotalMemo={selectTotalMemo}
           setSelectedLabel={setSelectedLabel}
           setIsSelectTotalMemo={setIsSelectTotalMemo}
           isSelectTotalMemo={isSelectTotalMemo}
@@ -116,6 +99,7 @@ function App() {
           setUpdateLabelName={setUpdateLabelName}
           setEditLabel={setEditLabel}
           setSelectedMemo={setSelectedMemo}
+          selectMemo={selectMemo}
           getLabels={getLabels}
         />
 

@@ -7,7 +7,6 @@ export default function LabelList({
   labels,
   setLabels,
   selectedLabel,
-  selectTotalMemo,
   setSelectedLabel,
   setIsSelectTotalMemo,
   isSelectTotalMemo,
@@ -25,6 +24,13 @@ export default function LabelList({
     setIsSelectTotalMemo(false);
     setSelectedLabel(label);
     window.history.pushState("", "Memo", `/labelId=${label?.id}`);
+  };
+
+  //TODO : 기존 selectLabel과 합치기?
+  const selectTotalMemo = () => {
+    setSelectedLabel(null);
+    setIsSelectTotalMemo(!isSelectTotalMemo);
+    window.history.pushState("", "Memo", `/`);
   };
 
   const addLabel = () => {
