@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axiosInstance from "./api/axios";
 import labelRequests from "./api/labelRequests";
 import memoRequests from "./api/memoRequests";
+import LabelList from "./component/LabelList";
+import Memo from "./types/MemoTypes";
+import Label from "./types/LabelTypes";
 
 function App() {
   // Label's state
@@ -46,23 +49,6 @@ function App() {
     });
   };
 
-  const addLabel = () => {
-    const newLabel: Label = {
-      title: "라벨 " + (labels.length + 1),
-    } as Label;
-
-    //TODO : 중복 검사 필요, try catch
-    axiosInstance.post(labelRequests.createLabel, newLabel).then((res) => {
-      getLabels();
-    });
-  };
-
-  const deleteLabel = async (id: string) => {
-    //TODO : Try Catch
-    await axiosInstance.delete(labelRequests.deleteLabel.replace(":id", id));
-    getLabels();
-  };
-
   const selectUpdateTargetLabel = async (id: string) => {
     setEditLabel(id);
   };
@@ -76,47 +62,11 @@ function App() {
     setEditLabel(null);
   };
 
-  const selectLabel = (label: Label | null) => {
-    setIsSelectTotalMemo(false);
-    setSelectedLabel(label);
-    window.history.pushState("", "Memo", `/labelId=${label?.id}`);
-  };
-
   //TODO : 기존 selectLabel과 합치기?
   const selectTotalMemo = () => {
     setSelectedLabel(null);
     setIsSelectTotalMemo(!isSelectTotalMemo);
     window.history.pushState("", "Memo", `/`);
-  };
-
-  const renderLabels = () => {
-    if (labels.length === 0) {
-      return <div>There are no labels</div>;
-    }
-    return labels.map((label) => {
-      return (
-        <div
-          key={label.id}
-          onClick={() => {
-            if (selectedLabel?.id === label.id) {
-              selectLabel(null);
-            } else {
-              selectLabel(label);
-            }
-          }}
-          style={
-            selectedLabel?.id === label.id ? { backgroundColor: "yellow" } : {}
-          }
-        >
-          {`${label.title}(${label.memoCount})`}
-          {selectedLabel?.id === label.id ? (
-            <span>
-              <button onClick={() => deleteLabel(label.id)}>Delete</button>
-            </span>
-          ) : null}
-        </div>
-      );
-    });
   };
 
   //Memo's
@@ -322,17 +272,16 @@ function App() {
         <h1>Note Web</h1>
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
-        <div style={{ flex: "20%", border: "1px solid" }}>
-          <div
-            onClick={() => selectTotalMemo()}
-            style={isSelectTotalMemo ? { backgroundColor: "yellow" } : {}}
-          >
-            전체 메모({memoList.length})
-          </div>
-          {renderLabels()}
-
-          <input type="button" value="Add Label" onClick={addLabel} />
-        </div>
+        <LabelList
+          labels={labels}
+          setLabels={setLabels}
+          selectedLabel={selectedLabel}
+          selectTotalMemo={selectTotalMemo}
+          setSelectedLabel={setSelectedLabel}
+          setIsSelectTotalMemo={setIsSelectTotalMemo}
+          isSelectTotalMemo={isSelectTotalMemo}
+          memoList={memoList}
+        />
 
         <div style={{ width: "30%", border: "1px solid" }}>
           {selectedLabel?.title ? (
@@ -391,20 +340,3 @@ function App() {
 }
 
 export default App;
-
-interface Memo {
-  id: string;
-  title: string;
-  content: string;
-  labels: Label[];
-  updatedAt: Date;
-  createdAt: Date;
-}
-
-interface Label {
-  title: string;
-  id: string;
-  memoCount: number;
-  updatedAt: Date;
-  createdAt: Date;
-}
