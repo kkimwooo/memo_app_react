@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Memo from "../../types/MemoTypes";
 import formattingDate from "../../utils/utils";
 import axiosInstance from "../../api/axios";
@@ -11,13 +11,13 @@ export default function MemoList({
   memosByLabel,
   memoList,
   selectedMemo,
+  checkedMemoIds,
   setUpdateLabelName,
   setEditLabel,
   selectMemo,
   getLabels,
+  setCheckedMemoIds,
 }: MemoListPropsType) {
-  const [selectedMemoIds, setSelectedMemoIds] = useState<string[]>([]);
-
   const updateLabel = async (id: string) => {
     //TODO : Try Catch
     await axiosInstance.put(labelRequests.updateLabel.replace(":id", id), {
@@ -31,12 +31,25 @@ export default function MemoList({
     setEditLabel(id);
   };
 
+  const onCheckMemo = (checkedId: string, checked: boolean) => {
+    if (checked) {
+      setCheckedMemoIds([...checkedMemoIds, checkedId]);
+    } else {
+      setCheckedMemoIds(
+        checkedMemoIds.filter((memoId) => memoId !== checkedId)
+      );
+    }
+  };
+
   const memoItem = (memo: Memo) => {
     return (
-      <div style={{ display: "flex", border: "1px solid" }}>
-        <input type="checkbox"></input>
+      <div key={memo.id} style={{ display: "flex", border: "1px solid" }}>
+        <input
+          type="checkbox"
+          id={memo.id}
+          onChange={(e) => onCheckMemo(e.target.id, e.target.checked)}
+        ></input>
         <div
-          key={memo.id}
           onClick={() => {
             selectMemo(memo);
           }}
@@ -69,7 +82,7 @@ export default function MemoList({
       return memoItem(memo);
     });
   };
-
+  //TODO : 컴포넌트 분리 필요
   return (
     <div style={{ width: "30%", border: "1px solid" }}>
       {selectedLabel?.title ? (
@@ -95,11 +108,21 @@ export default function MemoList({
           ) : (
             <div>
               {selectedLabel.title}
-              <button onClick={() => selectUpdateTargetLabel(selectedLabel.id)}>
-                라벨명 변경
-              </button>
-              <button>설정</button>
-              <button>삭제</button>
+
+              {checkedMemoIds.length > 0 ? (
+                <>
+                  {" "}
+                  <button
+                    onClick={() => selectUpdateTargetLabel(selectedLabel.id)}
+                  >
+                    라벨명 변경
+                  </button>
+                  <button>설정</button>
+                  <button>삭제</button>{" "}
+                </>
+              ) : (
+                <></>
+              )}
             </div>
           )}
 

@@ -20,7 +20,7 @@ function App() {
   const [memoList, setMemoList] = useState<Memo[]>([]);
   const [memosByLabel, setMemosByLabel] = useState<Memo[]>([]);
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
-  const [checkedMemo, setCheckedMemo] = useState<Memo[]>([]);
+  const [checkedMemoIds, setCheckedMemoIds] = useState<string[]>([]);
 
   // Memo Detail's state
   const [memoTitle, setMemoTitle] = useState<string>("");
@@ -44,6 +44,7 @@ function App() {
 
   useEffect(() => {
     setIsEditMemo(false);
+    setCheckedMemoIds([]);
     getMemosByLabel();
   }, [selectedLabel]);
 
@@ -98,11 +99,13 @@ function App() {
           memosByLabel={memosByLabel}
           memoList={memoList}
           selectedMemo={selectedMemo}
+          checkedMemoIds={checkedMemoIds}
           setUpdateLabelName={setUpdateLabelName}
           setEditLabel={setEditLabel}
           setSelectedMemo={setSelectedMemo}
           selectMemo={selectMemo}
           getLabels={getLabels}
+          setCheckedMemoIds={setCheckedMemoIds}
         />
 
         <MemoDetail
