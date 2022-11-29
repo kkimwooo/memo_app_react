@@ -94,28 +94,6 @@ function App() {
       return <div>There are no labels</div>;
     }
     return labels.map((label) => {
-      if (updateTargetLabel === label.id) {
-        return (
-          <div key={label.id}>
-            <input
-              type="text"
-              maxLength={10}
-              defaultValue={label.title}
-              onChange={(e) => {
-                setUpdateLabelName(e.target.value);
-              }}
-            />
-            <button onClick={() => setEditLabel(null)}>Cancel</button>
-            <button
-              onClick={() => {
-                updateLabel(label.id);
-              }}
-            >
-              Save
-            </button>
-          </div>
-        );
-      }
       return (
         <div
           key={label.id}
@@ -134,9 +112,6 @@ function App() {
           {selectedLabel?.id === label.id ? (
             <span>
               <button onClick={() => deleteLabel(label.id)}>Delete</button>
-              <button onClick={() => selectUpdateTargetLabel(label.id)}>
-                Rename
-              </button>
             </span>
           ) : null}
         </div>
@@ -179,22 +154,25 @@ function App() {
 
   const memoItem = (memo: Memo) => {
     return (
-      <div
-        key={memo.id}
-        onClick={() => {
-          selectMemo(memo);
-        }}
-        style={
-          selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
-        }
-      >
-        <div>{memo.title}</div>
-        <div>{formattingDate(memo.updatedAt.toString())}</div>
-        <div>
-          {" "}
-          {memo.content.length < 20
-            ? memo.content
-            : memo.content.slice(0, 20) + "..."}
+      <div style={{ display: "flex", border: "1px solid" }}>
+        <input type="checkbox"></input>
+        <div
+          key={memo.id}
+          onClick={() => {
+            selectMemo(memo);
+          }}
+          style={
+            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
+          }
+        >
+          <div>{memo.title}</div>
+          <div>{formattingDate(memo.updatedAt.toString())}</div>
+          <div>
+            {" "}
+            {memo.content.length < 20
+              ? memo.content
+              : memo.content.slice(0, 20) + "..."}
+          </div>
         </div>
       </div>
     );
@@ -359,18 +337,43 @@ function App() {
         <div style={{ width: "30%", border: "1px solid" }}>
           {selectedLabel?.title ? (
             <div>
-              <div>
-                {selectedLabel.title}
-                <button>이름 변경</button>
-                <button>설정</button>
-                <button>삭제</button>
-              </div>
+              {updateTargetLabel === selectedLabel.id ? (
+                <div>
+                  <input
+                    type="text"
+                    defaultValue={selectedLabel.title}
+                    onChange={(e) => {
+                      setUpdateLabelName(e.target.value);
+                    }}
+                  />
+                  <button onClick={() => setEditLabel(null)}>Cancel</button>
+                  <button
+                    onClick={() => {
+                      updateLabel(selectedLabel.id);
+                    }}
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  {selectedLabel.title}
+                  <button
+                    onClick={() => selectUpdateTargetLabel(selectedLabel.id)}
+                  >
+                    라벨명 변경
+                  </button>
+                  <button>설정</button>
+                  <button>삭제</button>
+                </div>
+              )}
+
               {renderMemosByLabel()}
             </div>
           ) : (
             <div>
               <div>
-                전체 메모 <button>이름 변경</button>
+                전체 메모
                 <button>설정</button>
                 <button>삭제</button>
               </div>
