@@ -7,6 +7,7 @@ function App() {
   // Label's state
   const [labels, setLabels] = useState<Label[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
+  const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(true);
   const [updateTargetLabel, setEditLabel] = useState<string | null>(null);
   const [updateLabelName, setUpdateLabelName] = useState<string | null>(null);
 
@@ -68,8 +69,16 @@ function App() {
   };
 
   const selectLabel = (label: Label | null) => {
+    setIsSelectTotalMemo(false);
     setSelectedLabel(label);
     window.history.pushState("", "Memo", `/labelId=${label?.id}`);
+  };
+
+  //TODO : 기존 selectLabel과 합치기?
+  const selectTotalMemo = () => {
+    setSelectedLabel(null);
+    setIsSelectTotalMemo(!isSelectTotalMemo);
+    window.history.pushState("", "Memo", `/`);
   };
 
   const renderLabels = () => {
@@ -160,11 +169,36 @@ function App() {
     window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
   };
 
-  const renderMemos = () => {
+  const renderMemosByLabel = () => {
     if (memosByLabel.length === 0) {
       return <div>There are no memos</div>;
     }
     return memosByLabel.map((memo) => {
+      return (
+        <div
+          key={memo.id}
+          onClick={() => {
+            if (selectedMemo?.id === memo.id) {
+              selectMemo(null);
+            } else {
+              selectMemo(memo);
+            }
+          }}
+          style={
+            selectedMemo?.id === memo.id ? { backgroundColor: "yellow" } : {}
+          }
+        >
+          {memo.title}
+        </div>
+      );
+    });
+  };
+
+  const renderTotalMemos = () => {
+    if (memoList.length === 0) {
+      return <div>There are no memos</div>;
+    }
+    return memoList.map((memo) => {
       return (
         <div
           key={memo.id}
@@ -197,10 +231,14 @@ function App() {
 
     const resultMemo = result.data.data;
     const memoId = resultMemo.id;
-    await axiosInstance.post(
-      labelRequests.addMemosToLabel.replace(":id", selectedLabel!.id),
-      { memoIds: [memoId] }
-    );
+
+    //선택된 라벨이 전체 메모인 경우엔 라벨을 추가하지 않는다.
+    if (selectedLabel !== null) {
+      await axiosInstance.post(
+        labelRequests.addMemosToLabel.replace(":id", selectedLabel!.id),
+        { memoIds: [memoId] }
+      );
+    }
 
     getMemoList();
     getLabels();
@@ -308,7 +346,12 @@ function App() {
       </nav>
       <div style={{ display: "flex", height: "100vh" }}>
         <div style={{ flex: "20%", border: "1px solid" }}>
-          <h3>전체 메모({memoList.length})</h3>
+          <div
+            onClick={() => selectTotalMemo()}
+            style={isSelectTotalMemo ? { backgroundColor: "yellow" } : {}}
+          >
+            전체 메모({memoList.length})
+          </div>
           {renderLabels()}
           <input type="button" value="Add Label" onClick={addLabel} />
         </div>
@@ -322,23 +365,22 @@ function App() {
                 <button>설정</button>
                 <button>삭제</button>
               </div>
-              {renderMemos()}
+              {renderMemosByLabel()}
             </div>
           ) : (
-            <h3>라벨을 선택해주세요</h3>
+            <div>
+              <div>
+                전체 메모 <button>이름 변경</button>
+                <button>설정</button>
+                <button>삭제</button>
+              </div>
+              {renderTotalMemos()}
+            </div>
           )}
         </div>
 
         <div style={{ width: "50%", border: "1px solid" }}>
-          {selectedLabel ? (
-            selectedMemo ? (
-              renderMemoDetail()
-            ) : (
-              renderCreateMemo()
-            )
-          ) : (
-            <h3>라벨을 선택해주세요</h3>
-          )}
+          {selectedMemo ? renderMemoDetail() : renderCreateMemo()}
         </div>
       </div>
     </div>
