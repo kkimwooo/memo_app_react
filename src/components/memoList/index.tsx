@@ -79,6 +79,10 @@ export default function MemoList({
           border: "1px solid",
           alignItems: "center",
           height: "60px",
+          backgroundColor: selectedMemoRecoil?.id === memo.id ? "gray" : "",
+        }}
+        onClick={() => {
+          selectMemo(memo);
         }}
       >
         <input
@@ -87,14 +91,7 @@ export default function MemoList({
           id={memo.id}
           onChange={(e) => onCheckMemo(e.target.id, e.target.checked)}
         ></input>
-        <div
-          onClick={() => {
-            selectMemo(memo);
-          }}
-          style={{
-            backgroundColor: selectedMemoRecoil?.id === memo.id ? "gray" : "",
-          }}
-        >
+        <div>
           <div>{memo.title}</div>
           <div>{formattingDate(memo.updatedAt.toString())}</div>
           <div> {memo.content}</div>
