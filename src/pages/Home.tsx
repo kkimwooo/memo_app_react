@@ -19,19 +19,24 @@ import {
 export default function Home() {
   const setLabelRecoil = useSetRecoilState(labelsState);
   const selectedLabelsRecoil = useRecoilValue(selectedLabelsState);
+  const setSelectedLabelsRecoil = useSetRecoilState(selectedLabelsState);
   const setMemoListRecoil = useSetRecoilState(memoListState);
   const setSelectedMemoStateRecoil = useSetRecoilState(selectedMemoState);
   const setCheckedMemoIdsRecoil = useSetRecoilState(checkedMemoIdsState);
   const setIsEditMemoRecoil = useSetRecoilState(isEditMemoState);
   const setMemosByLabelRecoil = useSetRecoilState(memosByLabelState);
-
-  console.log(selectedLabelsRecoil);
+  const selectedMemoRecoil = useRecoilValue(selectedMemoState);
 
   //Label's
   useEffect(() => {
     getLabels();
     getMemoList();
-    //TODO : url parameter 가져와서 memo, label 선택하기
+    //뒤로 가기 했을때 window.history에서 state를 가져와서 selectedMemoState, selectedLabelState를 변경해준다.
+    if (window.history.state) {
+      const { selectedLabels, selectedMemo } = window.history.state;
+      if (selectedLabels !== undefined) setSelectedLabelsRecoil(selectedLabels);
+      if (selectedMemo !== undefined) setSelectedMemoStateRecoil(selectedMemo);
+    }
   }, []);
 
   const getLabels = async () => {
@@ -76,7 +81,10 @@ export default function Home() {
   const selectMemo = (memo: Memo | null) => {
     setIsEditMemoRecoil(false);
     setSelectedMemoStateRecoil(memo);
-    //window.history.pushState("", "Memo", `/memoId=${memo?.id}`);
+    window.history.pushState(
+      [selectedLabelsRecoil, selectedMemoRecoil],
+      "Memo"
+    );
   };
 
   return (

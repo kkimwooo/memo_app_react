@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { labelsState, selectedLabelsState } from "../../recoil/label";
-import { memoListState } from "../../recoil/memo";
+import { memoListState, selectedMemoState } from "../../recoil/memo";
 import axiosInstance from "../../api/axios";
 import labelRequests from "../../api/labelRequests";
 import Label from "../../types/LabelTypes";
@@ -14,6 +14,8 @@ export default function LabelList() {
   const setSelectedLabelsRecoil = useSetRecoilState(selectedLabelsState);
 
   const memoListRecoil = useRecoilValue(memoListState);
+
+  const selectedMemoRecoil = useRecoilValue(selectedMemoState);
 
   //기존에 선택한 Label이 있으면 선택한 Total은 false
   const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(
@@ -31,14 +33,20 @@ export default function LabelList() {
   const selectLabel = (label: Label | null) => {
     setIsSelectTotalMemo(false);
     setSelectedLabelsRecoil(label);
-    //window.history.pushState("", "Memo", `/labelId=${label?.id}`);
+    window.history.pushState(
+      [selectedLabelsRecoil, selectedMemoRecoil],
+      "Memo"
+    );
   };
 
   //TODO : 기존 selectLabel과 합치기?
   const selectTotalMemo = () => {
     setSelectedLabelsRecoil(null);
     setIsSelectTotalMemo(!isSelectTotalMemo);
-    //window.history.pushState("", "Memo", `/`);
+    window.history.pushState(
+      [selectedLabelsRecoil, selectedMemoRecoil],
+      "Memo"
+    );
   };
 
   const addLabel = () => {
