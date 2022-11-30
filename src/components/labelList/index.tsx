@@ -15,7 +15,10 @@ export default function LabelList() {
 
   const memoListRecoil = useRecoilValue(memoListState);
 
-  const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(true);
+  //기존에 선택한 Label이 있으면 선택한 Total은 false
+  const [isSelectTotalMemo, setIsSelectTotalMemo] = useState<boolean>(
+    selectedLabelsRecoil ? false : true
+  );
 
   const getLabels = async () => {
     //TODO : Try Catch

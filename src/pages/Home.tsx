@@ -25,6 +25,8 @@ export default function Home() {
   const setIsEditMemoRecoil = useSetRecoilState(isEditMemoState);
   const setMemosByLabelRecoil = useSetRecoilState(memosByLabelState);
 
+  console.log(selectedLabelsRecoil);
+
   //Label's
   useEffect(() => {
     getLabels();
